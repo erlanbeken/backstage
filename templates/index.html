@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <input type="text" id="number" placeholder="Enter a number <= 100"/>
+    <input type="button" class="btn" value="Result" id="result_button"/>
+
+    <div id="result_container"></div>
+
+    <script type="text/template" id="result_template">
+        <table width="50%">
+            <tr><th>Datetime</th><th>Value</th><th>Number</th><th>Occurrences</th></tr>
+            <tr><td><%=datetime%></td><td><%=value%></td><td><%=number%></td><td><%=occurrences%></td></tr>
+        </table>
+    </script>
+
+    <script>
+        var MyViewClass = Backbone.View.extend({
+            el: "#result_container",
+            template: _.template($("#result_template").html()),
+            initialize: function() {
+                this.listenTo(this.model, 'change', this.render)
+            },
+            render: function() {
+                var htmlOutput = this.template(this.model.toJSON());
+                this.$el.html(htmlOutput);
+                return this;
+            }
+        });
+
+        var model = new Backbone.Model()
+        var view  = new MyViewClass({model: model})
+
+        $('#result_button').on('click', function(){
+            var n = $('#number').val();
+            if (! /^[\d]+$/.test(n)){
+                alert('Please enter a positive integer number')
+                return
+            }
+            n = parseInt(n)
+            if (n > 100 || n < 0){
+                alert('Please enter a number that is greater that 0 and less than 100')
+                return
+            }
+            model.fetch({url: '/difference/?number=' + $('#number').val()})
+        });
+    </script>
+{% endblock %}
